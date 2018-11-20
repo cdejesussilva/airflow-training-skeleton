@@ -4,6 +4,7 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import BranchPythonOperator
+from airflow.utils.trigger_rule import TriggerRule
 import datetime
 
 args = {"owner": "cdejesussilva", "start_date": airflow.utils.dates.days_ago(14)}
@@ -17,10 +18,10 @@ weekday_person_to_email = {
   0: "Bob", #Monday
   1: "Joe", #Tuesday
   2: "Alice", #Wednesday
-  3: "Joe2", #Thursday
-  4: "Alice2", #Friday
-  5: "Alice3", #Saturday
-  6: "Alice4", #Sunday
+  3: "Joe", #Thursday
+  4: "Alice", #Friday
+  5: "Alice", #Saturday
+  6: "Alice", #Sunday
 }
     
 def _get_weekday(execution_date,**context):
@@ -38,4 +39,4 @@ branching = BranchPythonOperator(task_id="branching",python_callable=_get_weekda
 
 for task in weekday_person_to_email.values():
   #print_weekday >> branching >> DummyOperator(task_id=task,dag=dag)
-  branching >> DummyOperator(task_id=task,dag=dag)
+  branching >> DummyOperator(task_id=task,dag=dag,trigger_rule = Triger_Rule.ONE_SUCCESS)
