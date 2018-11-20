@@ -7,7 +7,7 @@ dag = DAG(
     dag_id="hello_airflow",
     default_args={
         "owner": "godatadriven",
-        "start_date": date.today(),
+        "start_date": airflow.utils.dates.days_ago(3),
     },
 )
 
