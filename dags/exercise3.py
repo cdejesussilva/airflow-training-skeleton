@@ -17,11 +17,11 @@ dag = DAG(
 weekday_person_to_email = {
   0: "Bob", #Monday
   1: "Joe", #Tuesday
-  2: "Alice", #Wednesday
-  3: "Joe", #Thursday
-  4: "Alice", #Friday
-  5: "Alice", #Saturday
-  6: "Alice", #Sunday
+  2: "Alice1", #Wednesday
+  3: "Joe1", #Thursday
+  4: "Alice2", #Friday
+  5: "Alice3", #Saturday
+  6: "Alice4", #Sunday
 }
     
 def _get_weekday(execution_date,**context):
