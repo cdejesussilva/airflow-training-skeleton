@@ -34,9 +34,8 @@ print_weekday = PythonOperator(
     python_callable=_get_weekday,
     dag=dag)
    
-    
 branching = BranchPythonOperator(task_id="branching",python_callable=_get_weekday,provide_context=True,dag=dag)
-
+print_weekday >> branching
 for task in weekday_person_to_email.values():
   #print_weekday >> branching >> DummyOperator(task_id=task,dag=dag)
   branching >> DummyOperator(task_id=task,dag=dag,trigger_rule = TriggerRule.ONE_SUCCESS)
