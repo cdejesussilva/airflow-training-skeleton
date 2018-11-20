@@ -36,7 +36,5 @@ print_weekday = PythonOperator(
     
 branching = BranchPythonOperator(task_id="branching",python_callable=_get_weekday,provide_context=True,dag=dag)
 
-task_weekday = ["email_Bob","email_Joe","email_Alice","email_Joe","email_Alice","email_Alice","email_Alice"]
-
-for task in task_weekday:
-  print_weekday >> branching >> DummyOperator(task_id=task_weekday,dag=dag)
+for task in weekday_person_to_email:
+  print_weekday >> branching >> DummyOperator(task_id=weekday_person_to_email,dag=dag)
