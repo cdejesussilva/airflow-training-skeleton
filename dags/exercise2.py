@@ -34,6 +34,6 @@ t5 = DummyOperator(
         )
 
 
-print_exec_date >> [wait_5,wait_1,wait_10] >> dummy_1
+t1 >> [t2,t3,t4] >> t5
 
 
