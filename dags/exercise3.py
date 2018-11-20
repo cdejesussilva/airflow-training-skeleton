@@ -21,9 +21,6 @@ weekday_person_to_email = {
   5: "Alice", #Saturday
   6: "Alice", #Sunday
 }
-
-def print_weekday(datetime.datetime.weekday()):
-    print(datetime.datetime.weekday())
     
 def _get_weekday(execution_date,**context):
     return execution_date.strftime("%a")
