@@ -12,9 +12,6 @@ from airflow.contrib.operators.dataproc_operator import (
     DataprocClusterDeleteOperator,
 )
 
-from other import HttpToGcsOperator
-
-
 args = {
     "owner": "Catia",
     "start_date": airflow.utils.dates.days_ago(3),
@@ -24,6 +21,60 @@ dag = DAG(dag_id="exercise4",
           default_args=args,
           schedule_interval="0 0 * * *",
 )
+
+
+class HttpToGcsOperator(BaseOperator):
+    """    Calls an endpoint on an HTTP system to execute an action
+    :param http_conn_id: The connection to run the operator against
+    :type http_conn_id: string
+    :param endpoint: The relative part of the full url. (templated)
+    :type endpoint: string
+    :param gcs_path: The path of the GCS to store the result
+    :type gcs_path: string
+    """
+    template_fields = ("endpoint", "gcs_path")
+    template_ext = ()
+    ui_color = "#f4a460"
+
+    @apply_defaults
+    def __init__(
+            self,
+            endpoint,
+            gcs_bucket,
+            gcs_path,
+            method="GET",
+            http_conn_id="http_default",
+            gcs_conn_id="google_cloud_default",
+            *args,
+            **kwargs
+    ):
+        super(HttpToGcsOperator, self).__init__(*args, **kwargs)
+        self.http_conn_id = http_conn_id
+        self.method = method
+        self.endpoint = endpoint
+        self.gcs_bucket = gcs_bucket
+        self.gcs_path = gcs_path
+        self.gcs_conn_id = gcs_conn_id
+
+        def execute(self, context):
+            http = HttpHook(self.method, http_conn_id=self.http_conn_id)
+
+            self.log.info("Calling HTTP method")
+            response = http.run(self.endpoint)
+
+            with NamedTemporaryFile() as tmp_file_handle:
+                tmp_file_handle.write(response.content)
+                tmp_file_handle.flush()
+
+                hook = GoogleCloudStorageHook(google_cloud_storage_conn_id=self.gcs_conn_id)
+                hook.upload(
+                    bucket=self.gcs_bucket,
+                    object=self.gcs_path,
+                    filename=tmp_file_handle.name,
+                )
+
+
+
 
 
 #Postgres to GCS implementation
@@ -43,7 +94,7 @@ HttpToGcsOperator(
     endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency(),
     http_conn_id="airflow-training-currency-http",
     gcs_path="currency/{{ ds }}-" + currency() + ".json",
-    gcs_bucket="airflow-training-data",
+    gcs_bucket="airflow-training-catia",
     dag=dag,
 )
 
@@ -61,7 +112,7 @@ dataproc_create_cluster = DataprocClusterCreateOperator(
 
 compute_aggregates = DataProcPySparkOperator(
     task_id="compute_aggregates",
-    main="../other/build_statistics.py",
+    main="gs://airflow-training-catia/build_statistics.py",
     cluster_name="analyse-pricing-{{ ds }}",
     arguments=["{{ ds }}"],
     dag=dag,
