@@ -15,6 +15,8 @@ from airflow.contrib.operators.dataproc_operator import (
     DataprocClusterDeleteOperator,
 )
 from airflow.utils.decorators import apply_defaults
+from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
+
 
 args = {
     "owner": "Catia",
@@ -130,6 +132,19 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
 )
 
 
-[pgsl_to_gcs,get_currency_EUR] >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
+gcs_to_bq = GoogleCloudStorageToBigQueryOperator(
+    task_id="write_to_bq",
+    bucket="airflow-training-catia",
+    source_objects=["average_prices/transfer_date={{ ds }}/*"],
+    destination_project_dataset_table="airflowbolcom-9c7b4dddd139902f:prices.land_registry_price${{ ds_nodash }}",
+    source_format="PARQUET",
+    write_disposition="WRITE_TRUNCATE",
+    dag=dag,
+)
+
+
+
+
+[pgsl_to_gcs,get_currency_EUR] >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster >> gcs_to_bq
 
 
