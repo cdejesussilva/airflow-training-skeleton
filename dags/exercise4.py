@@ -60,22 +60,22 @@ class HttpToGcsOperator(BaseOperator):
         self.gcs_path = gcs_path
         self.gcs_conn_id = gcs_conn_id
 
-        def execute(self, context):
-            http = HttpHook(self.method, http_conn_id=self.http_conn_id)
+    def execute(self, context):
+        http = HttpHook(self.method, http_conn_id=self.http_conn_id)
 
-            self.log.info("Calling HTTP method")
-            response = http.run(self.endpoint)
+        self.log.info("Calling HTTP method")
+        response = http.run(self.endpoint)
 
-            with NamedTemporaryFile() as tmp_file_handle:
-                tmp_file_handle.write(response.content)
-                tmp_file_handle.flush()
+        with NamedTemporaryFile() as tmp_file_handle:
+            tmp_file_handle.write(response.content)
+            tmp_file_handle.flush()
 
-                hook = GoogleCloudStorageHook(google_cloud_storage_conn_id=self.gcs_conn_id)
-                hook.upload(
-                    bucket=self.gcs_bucket,
-                    object=self.gcs_path,
-                    filename=tmp_file_handle.name,
-                )
+            hook = GoogleCloudStorageHook(google_cloud_storage_conn_id=self.gcs_conn_id)
+            hook.upload(
+                bucket=self.gcs_bucket,
+                object=self.gcs_path,
+                filename=tmp_file_handle.name,
+            )
 
 
 
@@ -92,7 +92,7 @@ pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
 )
 
 
-HttpToGcsOperator(
+get_currency_EUR = HttpToGcsOperator(
     task_id="get_currency_EUR",
     method="GET",
     endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=EUR",
@@ -130,6 +130,6 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
 )
 
 
-[pgsl_to_gcs,HttpToGcsOperator] >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
+[pgsl_to_gcs,get_currency_EUR] >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
 
 
