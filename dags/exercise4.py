@@ -1,3 +1,5 @@
+from locale import currency
+
 import airflow
 from airflow.models import DAG
 from airflow.contrib.operators.postgres_to_gcs_operator import (
@@ -9,7 +11,8 @@ from airflow.contrib.operators.dataproc_operator import (
     DataProcPySparkOperator,
     DataprocClusterDeleteOperator,
 )
-import  HttpToGcsOperator
+
+from other import HttpToGcsOperator
 
 
 args = {
@@ -35,11 +38,11 @@ pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
 
 
 HttpToGcsOperator(
-    task_id="get_currency_" + currency,
+    task_id="get_currency_" + currency(),
     method="GET",
-    endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency,
+    endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency(),
     http_conn_id="airflow-training-currency-http",
-    gcs_path="currency/{{ ds }}-" + currency + ".json",
+    gcs_path="currency/{{ ds }}-" + currency() + ".json",
     gcs_bucket="airflow-training-data",
     dag=dag,
 )
