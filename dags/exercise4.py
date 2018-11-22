@@ -9,7 +9,7 @@ from airflow.contrib.operators.dataproc_operator import (
     DataProcPySparkOperator,
     DataprocClusterDeleteOperator,
 )
-
+import  HttpToGcsOperator
 
 
 args = {
@@ -23,7 +23,7 @@ dag = DAG(dag_id="exercise4",
 )
 
 
-#Postgres to GCS implementation - step 1
+#Postgres to GCS implementation
 pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
     task_id="postgres_to_gcs",
     sql="SELECT * FROM land_registry_price_paid_uk WHERE transfer_date = '{{ ds }}'",
@@ -34,8 +34,19 @@ pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
 )
 
 
+HttpToGcsOperator(
+    task_id="get_currency_" + currency,
+    method="GET",
+    endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=" + currency,
+    http_conn_id="airflow-training-currency-http",
+    gcs_path="currency/{{ ds }}-" + currency + ".json",
+    gcs_bucket="airflow-training-data",
+    dag=dag,
+)
 
-#Compute aggregates with Dataproc - step2
+
+
+#Compute aggregates with Dataproc
 dataproc_create_cluster = DataprocClusterCreateOperator(
     task_id="create_dataproc",
     cluster_name="analyse-pricing-{{ ds }}",
@@ -47,7 +58,7 @@ dataproc_create_cluster = DataprocClusterCreateOperator(
 
 compute_aggregates = DataProcPySparkOperator(
     task_id="compute_aggregates",
-    main="gs:../other/build_statistics.py",
+    main="../other/build_statistics.py",
     cluster_name="analyse-pricing-{{ ds }}",
     arguments=["{{ ds }}"],
     dag=dag,
@@ -61,6 +72,6 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
 )
 
 
-pgsl_to_gcs >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
+[pgsl_to_gcs,HttpToGcsOperator] >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
 
 
