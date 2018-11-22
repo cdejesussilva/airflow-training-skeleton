@@ -1,7 +1,7 @@
 from locale import currency
 
 import airflow
-from airflow.models import DAG
+from airflow.models import DAG, BaseOperator
 from airflow.contrib.operators.postgres_to_gcs_operator import (
     PostgresToGoogleCloudStorageOperator,
 )
