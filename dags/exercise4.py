@@ -96,7 +96,7 @@ get_currency_EUR = HttpToGcsOperator(
     task_id="get_currency_EUR",
     method="GET",
     endpoint="/airflow-training-transform-valutas?date={{ ds }}&from=GBP&to=EUR",
-    http_conn_id="airflow-training-currency-http",
+    http_conn_id="https://europe-west1-gdd-airflow-training.cloudfunctions.net/airflow-training-transform-valutas",
     gcs_path="currency/{{ ds }}-EUR.json",
     gcs_bucket="airflow-training-catia",
     dag=dag,
