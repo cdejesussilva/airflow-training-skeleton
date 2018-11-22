@@ -15,11 +15,13 @@ dag = DAG(dag_id="exercise4",
           schedule_interval="0 0 * * *",
 )
 
+
+#Postgres to GCS implementation - step 1
 pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
-    task_id="step1",
+    task_id="postgres_to_gcs",
     sql="SELECT * FROM land_registry_price_paid_uk WHERE transfer_date = '{{ ds }}'",
     bucket="airflow-training-catia",
-    filename="daily_load_{{ ds }}",
-    postgres_conn_id="catia_airflow_training",
+    filename="land_registry_price_paid_uk/{{ ds }}/properties_{}.json",
+    postgres_conn_id="airflow-training-postgres",
     dag=dag,
 )
