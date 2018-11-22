@@ -1,5 +1,5 @@
 import airflow
-import airflow.models import DAG
+from airflow.models import DAG
 from airflow.contrib.operators.postgres_to_gcs_operator import (
     PostgresToGoogleCloudStorageOperator,
 )
@@ -12,7 +12,8 @@ args = {
 
 dag = DAG(dag_id="exercise4",
           default_args=args,
-          schedule_interval="0 0 * * *",)
+          schedule_interval="0 0 * * *",
+)
 
 pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
     task_id="...",
@@ -20,11 +21,5 @@ pgsl_to_gcs = PostgresToGoogleCloudStorageOperator(
     bucket="...",
     filename="daily_load_{{ ds }}",
     postgres_conn_id="...",
-    dag=dag,)
-
-  
-  
-  
-  
-  
-  
+    dag=dag,
+)
