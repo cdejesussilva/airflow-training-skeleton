@@ -59,3 +59,8 @@ dataproc_delete_cluster = DataprocClusterDeleteOperator(
     project_id="airflowbolcom-9c7b4dddd139902f",
     dag=dag,
 )
+
+
+pgsl_to_gcs >> dataproc_create_cluster >> compute_aggregates >> dataproc_delete_cluster
+
+
