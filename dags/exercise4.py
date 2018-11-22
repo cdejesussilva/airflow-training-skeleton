@@ -1,6 +1,9 @@
 from locale import currency
+from tempfile import NamedTemporaryFile
 
 import airflow
+from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.hooks.http_hook import HttpHook
 from airflow.models import DAG, BaseOperator
 from airflow.contrib.operators.postgres_to_gcs_operator import (
     PostgresToGoogleCloudStorageOperator,
@@ -11,6 +14,7 @@ from airflow.contrib.operators.dataproc_operator import (
     DataProcPySparkOperator,
     DataprocClusterDeleteOperator,
 )
+from airflow.utils.decorators import apply_defaults
 
 args = {
     "owner": "Catia",
